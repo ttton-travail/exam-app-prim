@@ -28,21 +28,21 @@ export const GEMINI_TEMPERATURE = 1
 // -----------------------------------------------
 // アプリ情報
 // -----------------------------------------------
-export const APP_NAME = 'かたてスト'
+export const APP_NAME = 'かたてスト -小学生社会版-'
 // ブラウザタブ・検索結果・OGP用のフルタイトル（アプリ名＋副題、中黒区切り）。
-// ※ 画面ロゴ横の副題（labels.app.subtitle = '- 1Click共テ対策 -'）は装飾用で別物。
-export const APP_TITLE_FULL = 'かたてスト｜1Click共テ対策'
-export const APP_DESCRIPTION = 'かたてスト（1Click共テ対策）｜1ClickでAI問題生成→お手軽共通テスト対策アプリ'
+// ※ 画面ロゴ横の副題（labels.app.subtitle）は装飾用で別物。
+export const APP_TITLE_FULL = 'かたてスト -小学生社会版-｜都道府県・県庁所在地・地方・特産品の4択クイズ'
+export const APP_DESCRIPTION = 'かたてスト -小学生社会版-｜都道府県・県庁所在地・地方・特産品・東京23区を地図とあわせて学べる、小学生向け社会の4択クイズアプリ'
 // 本番URL（OGP・canonical・sitemap で使用）。末尾スラッシュなし。
+// ※ 別ドメイン／サブドメインを取得したら差し替える（暫定で本体ドメインを指定）。
 export const SITE_URL = 'https://katatest.ttton-notty.com'
 // SEO用キーワード（検索流入を狙う語）。metadata.keywords に渡す。
 export const SEO_KEYWORDS = [
-    'かたてスト', '共テ', '共通テスト', 'センター', 'センターテスト',
-    '共通テスト対策', '共通テスト 問題', '共通テスト 過去問', '一問一答',
-    '高校 物理', '高校 化学', '高校 生物', '高校 地学',
-    '物理基礎', '化学基礎', '生物基礎', '地学基礎', '情報I',
-    '勉強', '学習', '勉強アプリ', '学習アプリ', '問題集アプリ', '高校生',
-    'AI 問題生成', '大学受験', '受験勉強',
+    'かたてスト', '小学生 社会', '小学 社会', '社会 クイズ', '都道府県 クイズ',
+    '都道府県 覚え方', '県庁所在地', '県庁所在地 クイズ', '都道府県 地図',
+    '地方区分', '七地方区分', '特産品', '都道府県 特産品', '東京23区',
+    '白地図', '地理 クイズ', '小学4年生 社会', '小学生 勉強', '学習アプリ',
+    '社会 勉強アプリ', '問題集アプリ', '無料 学習',
     'Ttton', 'TtLab', 'ととらぼ', 'とととん', 'nottY',
 ]
 
@@ -125,12 +125,12 @@ export const ENABLE_SHARE_BUTTONS = true
 // ※Xは文字数制限があるため、タグは絞ってある。
 export const SHARE_MOBILE_URL = ''   // スマホ版公開後にURLを設定（空なら本文に出さない）
 // 汎用タグ（検索流入用）とブランドタグ（指名・集約用）を分けて、本文では改行で区切る
-export const SHARE_HASHTAGS = ['共通テスト', '大学受験', '勉強アプリ', '高校生']
-export const SHARE_BRAND_HASHTAGS = ['かたてスト', '1Click共テ対策', 'TtLab', 'ととらぼ']
+export const SHARE_HASHTAGS = ['小学生', '社会', '都道府県', '学習アプリ']
+export const SHARE_BRAND_HASHTAGS = ['かたてスト', '小学生社会版', 'TtLab', 'ととらぼ']
 export function buildShareText(pageUrl: string): string {
     const lines = [
-        'かたてスト（1Click共テ対策）',
-        '1ClickでAI問題生成→お手軽共テ対策アプリ',
+        'かたてスト -小学生社会版-',
+        '都道府県・県庁所在地・地方・特産品を地図で楽しく4択クイズ',
         '',
         '▼Web版',
         pageUrl,
@@ -165,13 +165,14 @@ export const DAILY_GEN_LIMIT_GLOBAL = 2000
 //   'placeholder' … グレー枠＋サイズ表示のダミーを出す。レイアウト確認・審査前用。
 //   'live'        … 実際の AdSense 広告を配信する（審査通過後）。
 // 審査フロー：placeholder でレイアウト確認 → 申請 → 通過後に 'live' へ。
-export const AD_MODE: 'off' | 'placeholder' | 'live' = 'live'
+// ※ 新アプリ用に AdSense は未設定。審査が済むまで 'off'。
+//   審査フロー：'placeholder' でレイアウト確認 → 申請 → 通過後に 'live'。
+export const AD_MODE: 'off' | 'placeholder' | 'live' = 'off'
 
-// AdSense のパブリッシャーID（ca-pub-XXXXXXXXXXXXXXXX）。通過後に設定。
-export const ADSENSE_CLIENT = 'ca-pub-5827479117826832'
-// 広告ユニットのスロットID。配置ごとに作成して設定する（通過後）。
-// 広告はフッター内（2カラムブロックの下・著作権表記の上）に1か所。
-// 設定画面・結果画面はどちらも同じ Footer を使うため、共通の1スロットで配信する。
+// AdSense のパブリッシャーID（ca-pub-XXXXXXXXXXXXXXXX）。
+// ★鋳型（旧アプリ）のIDは使い回さない。新アプリ用に取得・設定するまで空のまま。
+export const ADSENSE_CLIENT = ''
+// 広告ユニットのスロットID。新アプリで広告ユニットを作成したら設定する。
 export const ADSENSE_SLOTS = {
-    footerBottom: '4049295913', // フッター内バナー（設定・結果の両画面で共有）
+    footerBottom: '', // フッター内バナー（設定・結果の両画面で共有）
 } as const

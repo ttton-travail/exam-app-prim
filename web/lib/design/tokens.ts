@@ -11,10 +11,10 @@ export const design = {
     // カラーパレット
     // -----------------------------------------------
     color: {
-        // ブランド／操作色（青）。ボタン・選択肢キー・リンク・選択中の選択肢に使う。
-        primary:        '#2563EB', // メインの青
-        primaryHover:   '#1D4ED8',
-        primaryLight:   '#EFF6FF', // 選択中の選択肢の背景にも使う淡い青
+        // ブランド／操作色（ティール）。ボタン・選択肢キー・リンク・選択中の選択肢に使う。
+        primary:        '#0D9488', // メインのティール
+        primaryHover:   '#0F766E',
+        primaryLight:   '#F0FDFA', // 選択中の選択肢の背景にも使う淡いティール
 
         // 正誤色（緑＝正解 / 赤＝不正解）。
         // 「色だけで意味を伝えない」ため、結果表示では文字記号 ○ × とセットで使う。
@@ -23,10 +23,10 @@ export const design = {
         incorrect:      '#DC2626', // 不正解・赤
         incorrectLight: '#FFF5F5', // 不正解カードの淡い背景
 
-        // 選択中（回答中の選択肢）：primary（青）を使う。右端に✓を出して色覚非依存の手がかりも併用。
-        selected:        '#EFF6FF', // 選択中の背景（淡い青）
-        selectedBorder:  '#2563EB', // 選択中の枠（青）
-        selectedText:    '#2563EB', // 選択中の文字・チェック（青）
+        // 選択中（回答中の選択肢）：primary（ティール）を使う。右端に✓を出して色覚非依存の手がかりも併用。
+        selected:        '#F0FDFA', // 選択中の背景（淡いティール）
+        selectedBorder:  '#0D9488', // 選択中の枠（ティール）
+        selectedText:    '#0D9488', // 選択中の文字・チェック（ティール）
 
         // 旧名エイリアス（後方互換）。success=正解(緑), error=不正解(赤) に対応。
         // ※ 新規コードは correct/incorrect を使うこと。
@@ -41,7 +41,7 @@ export const design = {
         bg:             '#F8FAFC', // ページ背景
         surface:        '#FFFFFF', // カード背景
         border:         '#E2E8F0',
-        borderFocus:    '#2563EB',
+        borderFocus:    '#0D9488',
         textPrimary:    '#1E293B',
         textSecondary:  '#64748B',
         textMuted:      '#94A3B8',

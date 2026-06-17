@@ -36,7 +36,7 @@ const h1: React.CSSProperties = { fontSize: '22px', fontWeight: 700, margin: '0 
 const lead: React.CSSProperties = { fontSize: '13px', color: '#64748B', margin: '0 0 2rem' }
 const h2: React.CSSProperties = { fontSize: '17px', fontWeight: 700, margin: '2rem 0 0.5rem' }
 const p: React.CSSProperties = { margin: '0 0 0.75rem' }
-const a: React.CSSProperties = { color: '#2563EB' }
+const a: React.CSSProperties = { color: '#0D9488' }
 
 export default function PrivacyPolicyPage() {
     return (

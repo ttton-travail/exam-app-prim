@@ -1,22 +1,36 @@
-# exam-app
-Exam practice app for Japanese elementary school students.
+# かたてスト -小学生社会版-（prim-exam-app）
 
-## Overview
-問題をランダム生成する小学生向け学習アプリ。
+小学生（まずは4年生）向けの、**社会科 4択クイズ学習アプリ**です。
+既存アプリ「かたてスト（1Click共テ対策）」を鋳型に、小学校社会向けへ作り替えています。
 
-## Tech Stack
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
-- Gemini API (Google AI)
-- Vercel
+## このアプリの特徴
 
-## Development
-​```bash
-cd web
+- **都道府県・県庁所在地・地方区分・特産品・東京23区**を、地図と組み合わせて学べる
+- 問題は固定ではなく、**マスタデータ（県・地方・区の情報）から毎回 4択を動的生成**
+- フリガナ表示を **3段階（教科書ひらがな / 漢字ルビなし / 漢字ルビあり）** で切り替え可能
+- 白地図 + 番号で、地図 ⇄ 名前 の双方向出題に対応
+
+## 技術構成
+
+- Next.js 16 / React 19（App Router, Turbopack）
+- Supabase（マスタデータ。テーブルは `prim_` 接頭辞で既存アプリと区別）
+- Vercel デプロイ
+
+## 開発
+
+```bash
 npm install
 npm run dev
-​```
+```
 
-## License
-MIT
+http://localhost:3000 で起動します。
+
+## データ層
+
+- マスタテーブル：`prim_prefectures` / `prim_regions` / `prim_wards`
+- 問題は `lib/quizgen.ts`（予定）がマスタから 4択を組み立てる
+- AI生成機能（`app/api/generate`, `lib/gemini.ts`, `lib/prompts/*`）はコードとして残すが、UIからは非表示
+
+## 注意
+
+- 鋳型コピー由来のため、LP・ロゴ画像は当面そのまま（同名ファイルで後日差し替え予定）
