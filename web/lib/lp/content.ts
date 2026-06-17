@@ -43,9 +43,9 @@ export const lpContent = {
         // メインキャッチ：1行目（大）と2行目（やや小）でサイズを変える。
         // さらにその下に補足のサブテキスト（catchSub）を置く。
         catchMain1: '片手で完結',
-        catchMain2: '1Clickでカンタン共テ対策',
-        catchSub: 'Clickするだけで\nサクサク進む！',
-        catchSub2: '気軽に手軽に、\nAIで生成した新しい問題に\nどんどん挑戦しよう',
+        catchMain2: '1クリックでかんたんお勉強',
+        catchSub: 'クリックするだけで\nサクサク進む！',
+        catchSub2: '気軽に手軽に、\nランダムな新しい問題に\nどんどん挑戦しよう',
         ctaLabel: '今すぐアプリを始める',
     },
 
@@ -55,19 +55,19 @@ export const lpContent = {
             image: LP_IMAGES.col1,
             imageAlt: '完全無料・登録不要のイメージ',
             main: '完全無料・登録不要',
-            sub: '科目・単元・問題数を選んで\n始めるだけ',
+            sub: '項目・種類・問題数を選んで\n始めるだけ',
         },
         {
             image: LP_IMAGES.col2,
             imageAlt: '片手でサクサク進むイメージ',
             main: '必要なのはかたてだけ',
-            sub: '開始→解答→解説まで、\nスキマ時間でもサクサク進める',
+            sub: '問題作成→答え合わせまで、\nスキマ時間でもサクサク進める',
         },
         {
             image: LP_IMAGES.col3,
             imageAlt: 'AI生成で問題が尽きないイメージ',
             main: 'いつでも新たな挑戦を',
-            sub: 'AI生成で、好きなだけ\n新しい問題＆解説に出会える',
+            sub: '組み合わせをシャッフルして\n何度でも新しい問題に',
         },
     ],
 
@@ -79,15 +79,15 @@ export const lpContent = {
         image: { src: LP_IMAGES.appSample, alt: 'かたてスト 設定画面と結果画面の例' },
         // 3ステップ説明
         steps: [
-            { no: 'STEP 1', text: '科目・単元・問題数を選択' },
-            { no: 'STEP 2', text: 'みんなが今まで生成した問題 又は 新たにAI生成した問題を選んでスタート！' },
-            { no: 'STEP 3', text: '採点されたら解説で復習\n同じ問題をシャッフル / 新しい問題セットで何度でも再挑戦' },
+            { no: 'STEP 1', text: '項目・種類・問題数を選んで…' },
+            { no: 'STEP 2', text: '「問題を始める」ボタンを押すだけ！' },
+            { no: 'STEP 3', text: '答え合わせが終わったら\n同じ問題をシャッフル / 新しい問題セットで何度でも再挑戦' },
         ],
     },
 
     // 対応科目セクション
     subjects: {
-        heading: '現在の対応科目',
+        heading: '現在の対応項目',
     },
 
     // ⑦ CTA（科目パネル内に表示。リード文＋ボタン）

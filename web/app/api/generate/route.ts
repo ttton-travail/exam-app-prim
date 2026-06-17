@@ -14,11 +14,13 @@ import { generateQuiz } from '@/lib/gemini'
 import { buildPrompt, DEFAULT_EXAM_FORMAT } from '@/lib/prompts'
 import { SUBJECTS } from '@/lib/subjects'
 import {
-    getStockQuestions,
     saveQuestionsToStock,
     checkAndIncrementDailyUsage,
 } from '@/lib/stock'
-import { DAILY_GEN_LIMIT_GLOBAL } from '@/lib/config'
+import { getMasterData } from '@/lib/master'
+import { generateQuestions } from '@/lib/quizgen'
+import { shuffleQuiz } from '@/lib/shuffle'
+import { DAILY_GEN_LIMIT_GLOBAL, ALL_COUNT, ALL_COUNT_CAP } from '@/lib/config'
 import type { QuizSettings, Question } from '@/types/quiz'
 
 const log = (stage: string, data?: unknown) =>
@@ -44,7 +46,10 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        const need = settings.questionCount
+        // 「すべての◯◯」(ALL_COUNT) のときは上限いっぱい（県47/区23/地方8を全てカバー）。
+        const need = settings.questionCount === ALL_COUNT
+            ? ALL_COUNT_CAP
+            : settings.questionCount
         let questions: Question[] = []
 
         // ============================================================
@@ -52,28 +57,52 @@ export async function POST(req: NextRequest) {
         // ============================================================
 
         if (mode === 'stock') {
-            // 【ストックモード】用意済み問題だけを返す。AI生成は一切しない。
-            questions = await getStockQuestions(settings.subjectId, settings.unitIds, need)
-            log('ストックモード：取得', { got: questions.length, need })
+            // 【マスタ生成モード（小学生社会版の主経路）】
+            //   固定問題を持たず、DBのマスタ（県・地方・区）から quizgen が毎回4択を組む。
+            //   DB未接続・失敗時は getMasterData が seed にフォールバックする。
+            const masters = await getMasterData()
+
+            // 対象単元（id＋label＋questionType）。未指定なら科目の全単元。
+            const targetUnits =
+                settings.unitIds.length > 0
+                    ? subject.units.filter((u) => settings.unitIds.includes(u.id))
+                    : subject.units
+
+            // 各単元の出題形式で生成し、結合してから need 問だけ取り出す。
+            //   単元が複数あるときは均等めに（端数は先頭単元へ）割り振る。
+            const usable = targetUnits.filter((u) => !!u.questionType)
+            if (usable.length === 0) {
+                return NextResponse.json(
+                    { error: '出題できる単元がありません。単元を選び直してください。' },
+                    { status: 400 },
+                )
+            }
+            const perUnit = Math.ceil(need / usable.length)
+            let pool: Question[] = []
+            for (const u of usable) {
+                pool = pool.concat(
+                    generateQuestions(u.questionType!, u.id, u.label, perUnit, masters),
+                )
+            }
+            // 全体をシャッフルして need 問に切り、id を 1..N に振り直す。
+            questions = shuffleQuiz(pool)
+                .slice(0, need)
+                .map((q, i) => ({ ...q, id: i + 1 }))
+            log('マスタ生成モード：作成', { got: questions.length, need })
 
             if (questions.length === 0) {
                 return NextResponse.json(
                     {
                         error:
-                            '用意済みの問題が見つかりませんでした。科目・単元を変えてお試しください。',
+                            '問題を作成できませんでした。科目・単元を変えてお試しください。',
                     },
                     { status: 404 },
                 )
             }
 
-            const renumbered = questions
-                .slice(0, need)
-                .map((q, i) => ({ ...q, id: i + 1 }))
-            log('ストックモード：返却', { count: renumbered.length, need })
-            // need に満たなくても、ある分だけ返す（partial フラグで通知）
             return NextResponse.json({
-                questions: renumbered,
-                partial: renumbered.length < need,
+                questions,
+                partial: questions.length < need,
             })
         }
 

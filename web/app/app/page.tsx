@@ -8,7 +8,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DEFAULT_SUBJECT_ID } from '@/lib/subjects'
+import { DEFAULT_SUBJECT_ID, DEFAULT_CATEGORY_ID } from '@/lib/subjects'
 import { DEFAULT_QUESTION_COUNT, DEFAULT_EXAM_FORMAT } from '@/lib/config'
 import { shuffleQuiz } from '@/lib/shuffle'
 import { useDailyLimit } from '@/lib/useDailyLimit'
@@ -26,6 +26,7 @@ const log = (stage: string, data?: unknown) =>
 export default function Home() {
   const [phase, setPhase] = useState<AppPhase>('setting')
   const [settings, setSettings] = useState<QuizSettings>({
+    categoryId: DEFAULT_CATEGORY_ID,
     subjectId: DEFAULT_SUBJECT_ID,
     unitIds: [],
     questionCount: DEFAULT_QUESTION_COUNT,

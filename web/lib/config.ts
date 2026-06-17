@@ -11,6 +11,12 @@ export type QuestionCount = (typeof QUESTION_COUNT_OPTIONS)[number]
 
 export const DEFAULT_QUESTION_COUNT: QuestionCount = 10
 
+// 「すべての◯◯」を表す番兵値。実際の上限数は項目（都道府県47/地方8/区23）で決まるため、
+// API 側ではこの値を「上限いっぱい」と解釈して大きな数に置き換える。
+export const ALL_COUNT = -1
+// 「すべて」を選んだときに API へ渡す十分大きな上限（県47・区23・地方8 を全てカバー）。
+export const ALL_COUNT_CAP = 100
+
 // -----------------------------------------------
 // Gemini API設定
 // -----------------------------------------------

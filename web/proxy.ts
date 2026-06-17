@@ -1,6 +1,9 @@
 // ===========================
-// 公開制御ミドルウェア
-// middleware.ts （プロジェクトのルート＝web/ 直下に置く）
+// 公開制御プロキシ（旧 middleware.ts）
+// proxy.ts （プロジェクトのルート＝web/ 直下に置く）
+//
+// Next.js 16 で「middleware」ファイル規約は非推奨となり「proxy」に改名された。
+// ロジックは変更なし（リネームのみ）。Edge固有機能は使っていないため安全に移行可能。
 //
 // 環境変数 SITE_MODE で公開状態を切り替える。Vercel無料プランでも動作する。
 //
@@ -15,7 +18,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const MODE = process.env.SITE_MODE ?? 'open'
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl
 
     // 静的アセットや内部ファイルは常に通す（準備中ページの表示に必要）
@@ -52,7 +55,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next()
 }
 
-// ミドルウェアを適用するパス（静的ファイルを除く全体）
+// プロキシを適用するパス（静的ファイルを除く全体）
 export const config = {
     matcher: ['/((?!_next/static|_next/image).*)'],
 }
