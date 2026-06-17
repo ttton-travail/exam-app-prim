@@ -1,8 +1,8 @@
 # exam-app
-AI-powered exam practice app for Japanese high school students.
+AI-powered exam practice app for Japanese elementary school students.
 
 ## Overview
-共通テスト形式の問題をAIが無限に生成する高校生向け学習アプリ。
+問題をランダム生成する小学生向け学習アプリ。
 
 ## Tech Stack
 - Next.js (App Router)
