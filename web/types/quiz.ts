@@ -98,6 +98,7 @@ export type QuestionType =
     | 'capital_name_to_map'   // 県庁所在地名 → 地図（その県の番号）
     // --- 特産品 ---
     | 'pref_to_specialty'     // 県名 → 特産品
+    | 'specialty_map_to_name' // 地図（番号）→ 特産品
     // --- 発展（組み合わせ系） ---
     | 'pref_capital_set'      // 県＋県庁所在地
     | 'pref_map_capital_set'  // 地図＋県＋県庁所在地

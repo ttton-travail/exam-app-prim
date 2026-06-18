@@ -4,6 +4,7 @@
 // ===========================
 
 import { design, styles, labels } from '@/lib/design'
+import Furigana from '@/components/Furigana'
 import { displayKey } from '@/lib/shuffle'
 import { useResponsive } from '@/lib/useBreakpoint'
 import type { Question, AnswerMap } from '@/types/quiz'
@@ -58,9 +59,9 @@ export default function ResultScreen({
                     {correct ? labels.result.correctMark : labels.result.incorrectMark}
                   </span>{' '}
                   {/* シャッフルされた q.id ではなく、表示順(index)をベースに番号を振る */}
-                  Q{index + 1}. {q.unit}
+                  Q{index + 1}. <Furigana text={q.unit} />
                 </p>
-                <p style={styles.resultQuestion}>{q.question}</p>
+                <p style={styles.resultQuestion}><Furigana text={q.question} /></p>
 
                 <p style={{ ...styles.resultAnswer, color: design.color.textSecondary }}>
                   あなたの回答：
@@ -75,7 +76,7 @@ export default function ResultScreen({
                   </p>
                 )}
 
-                <p style={styles.explanation}>💡 {q.explanation}</p>
+                <p style={styles.explanation}>💡 <Furigana text={q.explanation} /></p>
 
                 {q.keywords && q.keywords.length > 0 && (
                   <p style={styles.keywords}>
@@ -95,14 +96,14 @@ export default function ResultScreen({
           style={bp === 'mobile' ? { ...styles.primaryButton, whiteSpace: 'pre-line' } : styles.primaryButton}
         >
           {bp === 'mobile'
-            ? labels.result.shuffleRetry
-            : labels.result.shuffleRetry.replace('\n', '')}
+            ? <Furigana text={labels.result.shuffleRetry} />
+            : <Furigana text={labels.result.shuffleRetry.replace('\n', '')} />}
         </button>
         <button
           onClick={onBackToSetting}
           style={{ ...styles.secondaryButton, width: '100%', marginTop: design.spacing.sm }}
         >
-          {labels.result.backToSetting}
+          <Furigana text={labels.result.backToSetting} />
         </button>
 
       </div>

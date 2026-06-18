@@ -18,6 +18,7 @@ import { SUBJECTS } from '@/lib/subjects'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { lpContent, LP_SUBJECT_IMAGES } from '@/lib/lp/content'
+import Furigana from '@/components/Furigana'
 import type { NewsItem } from '@/lib/news'
 
 export default function LandingPage() {
@@ -83,7 +84,7 @@ export default function LandingPage() {
                 boxShadow: design.shadow.md,
             }}
         >
-            {label}
+            <Furigana text={label} />
         </Link>
     )
 
@@ -144,7 +145,7 @@ export default function LandingPage() {
                                     fontWeight: design.font.weightBold,
                                 }}
                             >
-                                {lpContent.hero.catchMain1}
+                                <Furigana text={lpContent.hero.catchMain1} />
                             </span>
                             <span
                                 style={{
@@ -152,7 +153,7 @@ export default function LandingPage() {
                                     fontSize: bp === 'desktop' ? '2rem' : '1.75rem',
                                 }}
                             >
-                                {lpContent.hero.catchMain2}
+                                <Furigana text={lpContent.hero.catchMain2} />
                             </span>
                         </h1>
                         <p
@@ -168,8 +169,8 @@ export default function LandingPage() {
                             }}
                         >
                             {bp === 'mobile'
-                                ? lpContent.hero.catchSub
-                                : lpContent.hero.catchSub.replace('\n', '')}
+                                ? <Furigana text={lpContent.hero.catchSub} />
+                                : <Furigana text={lpContent.hero.catchSub.replace('\n', '')} />}
                         </p>
                         <p
                             style={{
@@ -182,7 +183,7 @@ export default function LandingPage() {
                                 margin: `0 0 ${design.spacing.lg}`,
                             }}
                         >
-                            {lpContent.hero.catchSub2}
+                            <Furigana text={lpContent.hero.catchSub2} />
                         </p>
                         {ctaButton(lpContent.hero.ctaLabel)}
                     </div>
@@ -231,9 +232,9 @@ export default function LandingPage() {
                                     margin: `${design.spacing.md} 0 ${design.spacing.xs}`,
                                 }}
                             >
-                                {p.main}
+                                <Furigana text={p.main} />
                             </p>
-                            <p style={{ ...typography.subText, fontSize: design.font.sizeMd, margin: 0, whiteSpace: 'pre-line' }}>{p.sub}</p>
+                            <p style={{ ...typography.subText, fontSize: design.font.sizeMd, margin: 0, whiteSpace: 'pre-line' }}><Furigana text={p.sub} /></p>
                         </div>
                     ))}
                 </div>
@@ -249,7 +250,7 @@ export default function LandingPage() {
                         margin: `0 0 ${design.spacing.xl}`,
                     }}
                 >
-                    {lpContent.usage.heading}
+                    <Furigana text={lpContent.usage.heading} />
                 </h2>
                 <div
                     style={{
@@ -303,7 +304,7 @@ export default function LandingPage() {
                                     {s.no}
                                 </span>
                                 <p style={{ ...typography.subText, fontSize: design.font.sizeMd, color: design.color.textPrimary, whiteSpace: 'pre-line', margin: `${design.spacing.xs} 0 0` }}>
-                                    {s.text}
+                                    <Furigana text={s.text} />
                                 </p>
                             </div>
                         ))}
@@ -321,7 +322,7 @@ export default function LandingPage() {
                         margin: `0 0 ${design.spacing.lg}`,
                     }}
                 >
-                    {lpContent.subjects.heading}
+                    <Furigana text={lpContent.subjects.heading} />
                 </h2>
                 <div
                     style={{
@@ -394,7 +395,7 @@ export default function LandingPage() {
                         margin: 0,
                     }}
                 >
-                    {lpContent.bottomCta.lead}
+                    <Furigana text={lpContent.bottomCta.lead} />
                 </p>
             </section>
             {/* ボタン部分：画面全幅の白背景パネル。ボタンはワイドなバー状にして左右の余白を埋める */}
@@ -425,7 +426,7 @@ export default function LandingPage() {
                         boxShadow: design.shadow.md,
                     }}
                 >
-                    {lpContent.bottomCta.ctaLabel}
+                    <Furigana text={lpContent.bottomCta.ctaLabel} />
                 </Link>
             </div>
 
@@ -440,7 +441,7 @@ export default function LandingPage() {
                         margin: 0,
                     }}
                 >
-                    {lpContent.news.heading}
+                    <Furigana text={lpContent.news.heading} />
                 </h2>
             </section>
             {/* リスト領域：画面全幅の白パネル（リスト自体は 560px 中央寄せ） */}

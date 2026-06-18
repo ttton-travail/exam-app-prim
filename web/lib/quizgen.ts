@@ -405,6 +405,28 @@ export function generateQuestions(
             break
         }
 
+        case 'specialty_map_to_name': {
+            // 地図（番号）→ 特産品。対象県を地図で強調し、その特産品を当てる。
+            for (const p of takePrefs(count)) {
+                const correct = specialtyText(p)
+                const correctSet = new Set(p.specialties)
+                const wrongPool = PREFECTURES
+                    .filter((x) => x.id !== p.id && !x.specialties.some((s) => correctSet.has(s)))
+                    .map(specialtyText)
+                out.push(build({
+                    unitId, unitLabel,
+                    question: `地図の【${p.mapNo}】の都道府県の特産品はどれでしょう？`,
+                    correct,
+                    wrongs: pickWrong(wrongPool, new Set([correct]), 3),
+                    explanation: `地図${p.mapNo}番「${p.name}」の特産品は「${correct}」などです。`,
+                    keywords: [p.name, ...p.specialties],
+                    mapKind: 'pref', mapNo: p.mapNo,
+                    mapHighlight: true,
+                }))
+            }
+            break
+        }
+
         case 'pref_specialty_set': {
             // 4択すべて「県 - 特産品」。県も特産品もランダム。正しい組にならない誤答3つ。
             for (const p of takePrefs(count)) {
@@ -475,10 +497,10 @@ export function generateQuestions(
             for (const r of takeRegions(count)) {
                 out.push(build({
                     unitId, unitLabel,
-                    question: `地図で色のついた地方はどれでしょう？`,
+                    question: `地図の【${r.mapNo}】の地方はどれでしょう？`,
                     correct: r.name,
                     wrongs: pickWrong(allRegionNames, new Set([r.name]), 3),
-                    explanation: `色のついた地方は「${r.name}」です。`,
+                    explanation: `地図の${r.mapNo}番の地方は「${r.name}」です。`,
                     keywords: [r.name, r.nameKana],
                     mapKind: 'region', mapNo: r.mapNo,
                     mapHighlight: true,

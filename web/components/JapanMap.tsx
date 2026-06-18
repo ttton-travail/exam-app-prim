@@ -155,10 +155,10 @@ function applyView(
             const fill = opts.mode === 'correct' ? CORRECT_FILL : ACTIVE_FILL
             const badge = opts.mode === 'correct' ? CORRECT_BADGE : ACTIVE_BADGE
             target.querySelectorAll('path').forEach((p: SVGPathElement) => {
-                p.style.fill = fill
+                p.style.setProperty('fill', fill, 'important')
             })
             target.querySelectorAll('circle').forEach((b: SVGCircleElement) => {
-                if (b.classList.contains('badge-bg')) b.style.fill = badge
+                if (b.classList.contains('badge-bg')) b.style.setProperty('fill', badge, 'important')
             })
         }
     }

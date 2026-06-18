@@ -1,6 +1,6 @@
 // ===========================
 // 設定画面コンポーネント
-// components/SettingScreen.tsx
+// app/components/SettingScreen.tsx
 //
 // 階層：科目（上位グループ）→ 項目 → 出題方法 → 問題数。
 // 問題はマスタから動的生成するため、ストック概数の表示は行わない。
@@ -10,6 +10,7 @@
 'use client'
 
 import { design, styles, labels } from '@/lib/design'
+import Furigana from '@/components/Furigana'
 import { useResponsive } from '@/lib/useBreakpoint'
 import { CATEGORIES, SUBJECTS, ALL_UNIT_LABEL } from '@/lib/subjects'
 import { QUESTION_COUNT_OPTIONS, ALL_COUNT } from '@/lib/config'
@@ -83,20 +84,20 @@ export default function SettingScreen({
         {/** エラーカード */}
         {error && (
           <div style={styles.errorCard}>
-            <p style={styles.errorCardTitle}>{labels.error.title}</p>
+            <p style={styles.errorCardTitle}><Furigana text={labels.error.title} /></p>
             <p style={styles.errorCardBody}>{error}</p>
             <button onClick={onClearError} style={styles.errorRetryButton}>
-              {labels.error.retry}
+              <Furigana text={labels.error.retry} />
             </button>
           </div>
         )}
 
         {/** 導入文 */}
-        <p style={{ ...styles.subtitle, fontSize: r.bodySize, textAlign: 'left', margin: `0 0 ${design.spacing.md}` }}>{labels.setting.intro}</p>
+        <p style={{ ...styles.subtitle, fontSize: r.bodySize, textAlign: 'left', margin: `0 0 ${design.spacing.md}` }}><Furigana text={labels.setting.intro} /></p>
 
         {/** 科目選択（上位グループ。現在は社会のみだが将来の拡張に備え常に表示） */}
         <section style={styles.section}>
-          <label style={styles.label}>{labels.setting.categoryLabel}</label>
+          <label style={styles.label}><Furigana text={labels.setting.categoryLabel} /></label>
           <div style={styles.chipRow}>
             {CATEGORIES.filter((c) => c.enabled !== false).map((c) => (
               <button
@@ -115,7 +116,7 @@ export default function SettingScreen({
 
         {/** 項目選択 */}
         <section style={styles.section}>
-          <label style={styles.label}>{labels.setting.subjectLabel}</label>
+          <label style={styles.label}><Furigana text={labels.setting.subjectLabel} /></label>
           <div style={styles.chipRow}>
             {visibleSubjects.map((s) => (
               <button
@@ -135,8 +136,8 @@ export default function SettingScreen({
         {/** 出題方法選択 */}
         <section style={styles.section}>
           <label style={styles.label}>
-            {labels.setting.unitLabel}
-            <span style={styles.labelNote}>{labels.setting.unitNote}</span>
+            <Furigana text={labels.setting.unitLabel} />
+            <span style={styles.labelNote}><Furigana text={labels.setting.unitNote} /></span>
           </label>
           <div style={styles.chipRow}>
             {currentSubject?.units.map((u) => (
@@ -156,7 +157,7 @@ export default function SettingScreen({
 
         {/** 問題数選択（末尾に「すべての◯◯」） */}
         <section style={styles.section}>
-          <label style={styles.label}>{labels.setting.countLabel}</label>
+          <label style={styles.label}><Furigana text={labels.setting.countLabel} /></label>
           <div style={styles.chipRow}>
             {QUESTION_COUNT_OPTIONS.map((n) => (
               <button
@@ -194,10 +195,10 @@ export default function SettingScreen({
         >
           {loading ? (
             <>
-              <span className="spinner" /> {labels.setting.generating}
+              <span className="spinner" /> <Furigana text={labels.setting.generating} />
             </>
           ) : (
-            labels.setting.fromStock
+            <Furigana text={labels.setting.fromStock} />
           )}
         </button>
 

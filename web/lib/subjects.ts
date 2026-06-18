@@ -55,6 +55,7 @@ export const SUBJECTS: Subject[] = [
         enabled: true,
         units: [
             { id: 'pref_to_specialty', label: '都道府県→特産品', questionType: 'pref_to_specialty', supportsAll: true },
+            { id: 'specialty_map_to_name', label: '地図→特産品', questionType: 'specialty_map_to_name', supportsAll: true },
         ],
     },
 

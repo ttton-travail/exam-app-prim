@@ -1,6 +1,6 @@
 // ===========================
 // 問題演習画面コンポーネント
-// QuizScreen.tsx
+// app/components/QuizScreen.tsx
 // ===========================
 
 import { styles, labels } from '@/lib/design'
@@ -8,6 +8,7 @@ import { displayKey } from '@/lib/shuffle'
 import { useResponsive } from '@/lib/useBreakpoint'
 import type { Question, AnswerMap, ChoiceId } from '@/types/quiz'
 import JapanMap from '@/components/JapanMap'
+import Furigana from '@/components/Furigana'
 
 interface Props {
   questions: Question[]
@@ -52,10 +53,10 @@ export default function QuizScreen({
         </p>
 
         {/** 単元バッジ */}
-        <p style={styles.unitBadge}>{q.unit}</p>
+        <p style={styles.unitBadge}><Furigana text={q.unit} /></p>
 
         {/** 問題文 */}
-        <p style={{ ...styles.questionText, fontSize: r.bodySize }}>{q.question}</p>
+        <p style={{ ...styles.questionText, fontSize: r.bodySize }}><Furigana text={q.question} /></p>
 
         {/** 地図（地図系の出題のみ）。
              ・単独出題（mapHighlight=true）… 対象を強調して「これは何？」と問う。
@@ -93,7 +94,7 @@ export default function QuizScreen({
                 }}
               >
                 <span style={styles.choiceKey}>{displayKey(i)}</span>
-                <span>{choice.text}</span>
+                <span><Furigana text={choice.text} /></span>
                 {isSelected && (
                   <span style={styles.choiceCheck} aria-hidden="true">
                     {labels.result.selectedMark}
@@ -132,7 +133,7 @@ export default function QuizScreen({
         <div style={styles.navRow}>
           {!isFirst && (
             <button onClick={onPrev} style={styles.secondaryButton}>
-              {labels.quiz.prev}
+              <Furigana text={labels.quiz.prev} />
             </button>
           )}
           <div style={{ flex: 1 }} />
@@ -147,7 +148,7 @@ export default function QuizScreen({
                 ...(hasAnswered ? {} : styles.buttonDisabled),
               }}
             >
-              {labels.quiz.next}
+              <Furigana text={labels.quiz.next} />
             </button>
           ) : (
             <button
@@ -160,7 +161,7 @@ export default function QuizScreen({
                 ...(hasAnswered ? {} : styles.buttonDisabled),
               }}
             >
-              {labels.quiz.finish}
+              <Furigana text={labels.quiz.finish} />
             </button>
           )}
         </div>
@@ -168,7 +169,7 @@ export default function QuizScreen({
         {/** 回答を止めて問題作成画面（設定画面）へ戻る。前へ/次への下、左端に控えめに。 */}
         <div style={styles.quizBackRow}>
           <button onClick={onBackToSetting} style={styles.quizBackLink}>
-            ← {labels.result.backToSetting}
+            ← <Furigana text={labels.result.backToSetting} />
           </button>
         </div>
 
