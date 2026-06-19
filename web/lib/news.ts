@@ -4,12 +4,15 @@
 //
 // Supabaseの news テーブルを読み、LP のお知らせ表示用に NewsItem[] を返す。
 // ・getNews: お知らせを表示順（sort_order降順→日付降順）で取得
+// ・apps 列（text[]）に自分のアプリキー（config.ts の APP_KEY）を含む行だけ表示する。
+//   系列アプリ（exam-app / prim …）でお知らせを共有しつつ、表示対象を行ごとに選べる。
 //
 // 追加・修正は Supabase の Table Editor から news テーブルの行を
 // 編集するだけでよい（デプロイ不要で反映される）。
 // ===========================
 
 import { getReadClient } from '@/lib/supabase'
+import { APP_KEY } from '@/lib/config'
 
 /** LP表示用の1件 */
 export interface NewsItem {
@@ -24,6 +27,7 @@ interface NewsRow {
     body: string
     tag: string | null
     sort_order: number
+    apps: string[] | null   // 表示対象アプリ（例 ['exam-app','prim']）。null/空は全アプリ非表示扱い。
 }
 
 /**
@@ -40,7 +44,11 @@ export async function getNews(): Promise<NewsItem[]> {
 
     const { data, error } = await client
         .from('news')
-        .select('date_text, body, tag, sort_order')
+        .select('date_text, body, tag, sort_order, apps')
+        // apps 列（text[]）に自分のアプリキーを含む行だけ取得する。
+        // 例: 共通のお知らせは apps={exam-app,prim} のように複数入れる。
+        //     このアプリ専用は apps={prim} のように1個だけ入れる。
+        .contains('apps', [APP_KEY])
         .order('sort_order', { ascending: false })
         .order('date_text', { ascending: false })
 
