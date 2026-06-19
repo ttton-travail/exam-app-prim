@@ -20,8 +20,18 @@ export function shuffle<T>(arr: readonly T[]): T[] {
     return a
 }
 
-/** 1問の選択肢順だけをシャッフル（answer は中身のIDなので書き換え不要） */
+/** 1問の選択肢順だけをシャッフル（answer は中身のIDなので書き換え不要）。
+ *  ただし「名前→地図」系（選択肢が『○番』で answerMapNo を持つ）は、
+ *  選択肢を地図番号の昇順に並べる（シャッフルしない）。番号がバラけると探しにくいため。 */
 export function shuffleChoices(q: Question): Question {
+    if (q.answerMapNo != null) {
+        const num = (s: string): number => {
+            const m = s.match(/\d+/)
+            return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER
+        }
+        const sorted = [...q.choices].sort((a, b) => num(a.text) - num(b.text))
+        return { ...q, choices: sorted }
+    }
     return { ...q, choices: shuffle(q.choices) }
 }
 

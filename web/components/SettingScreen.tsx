@@ -1,6 +1,6 @@
 // ===========================
 // 設定画面コンポーネント
-// app/components/SettingScreen.tsx
+// components/SettingScreen.tsx
 //
 // 階層：科目（上位グループ）→ 項目 → 出題方法 → 問題数。
 // 問題はマスタから動的生成するため、ストック概数の表示は行わない。
@@ -108,7 +108,7 @@ export default function SettingScreen({
                   ...(settings.categoryId === c.id ? styles.chipButtonActive : {}),
                 }}
               >
-                {c.label}
+                <Furigana text={c.label} />
               </button>
             ))}
           </div>
@@ -117,8 +117,9 @@ export default function SettingScreen({
         {/** 項目選択 */}
         <section style={styles.section}>
           <label style={styles.label}><Furigana text={labels.setting.subjectLabel} /></label>
+          {/** 通常の項目（東京23区を除く）を1行に。23区だけは「おまけ」として下に改行して並べる。 */}
           <div style={styles.chipRow}>
-            {visibleSubjects.map((s) => (
+            {visibleSubjects.filter((s) => s.id !== 'ward').map((s) => (
               <button
                 key={s.id}
                 onClick={() => handleSubjectChange(s.id)}
@@ -127,10 +128,31 @@ export default function SettingScreen({
                   ...(settings.subjectId === s.id ? styles.chipButtonActive : {}),
                 }}
               >
-                {s.label}
+                <Furigana text={s.label} />
               </button>
             ))}
           </div>
+
+          {/** おまけ（東京23区）。薄グレーの見出しの下に、23区チップだけを別行で出す。 */}
+          {visibleSubjects.some((s) => s.id === 'ward') && (
+            <div style={{ marginTop: design.spacing.sm }}>
+              <p style={styles.omakeNote}>おまけ</p>
+              <div style={styles.chipRow}>
+                {visibleSubjects.filter((s) => s.id === 'ward').map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => handleSubjectChange(s.id)}
+                    style={{
+                      ...styles.chipButton,
+                      ...(settings.subjectId === s.id ? styles.chipButtonActive : {}),
+                    }}
+                  >
+                    <Furigana text={s.label} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         {/** 出題方法選択 */}
@@ -149,7 +171,7 @@ export default function SettingScreen({
                   ...(settings.unitIds.includes(u.id) ? styles.chipButtonActive : {}),
                 }}
               >
-                <span>{u.label}</span>
+                <span><Furigana text={u.label} /></span>
               </button>
             ))}
           </div>

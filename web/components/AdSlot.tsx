@@ -1,6 +1,6 @@
 // ===========================
 // 広告枠コンポーネント
-// app/components/AdSlot.tsx
+// components/AdSlot.tsx
 //
 // AD_MODE（config.ts）で表示を切り替える：
 //   'off'         … 何も出さない（DOMにも出さない）

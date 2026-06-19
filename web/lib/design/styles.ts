@@ -79,6 +79,14 @@ export const styles: Record<string, React.CSSProperties> = {
         marginLeft: design.spacing.sm,
     },
 
+    /** 「おまけ」見出し（23区チップの上に出す薄グレーの小見出し） */
+    omakeNote: {
+        margin: `0 0 ${design.spacing.xs}`,
+        fontSize: design.font.sizeXs,
+        color: design.color.textMuted,
+        fontWeight: design.font.weightMedium,
+    },
+
     /** チップボタン行 */
     chipRow: {
         display: 'flex',
@@ -321,6 +329,74 @@ export const styles: Record<string, React.CSSProperties> = {
         fontWeight: design.font.weightBold,
         minWidth: '1.2rem',
         color: design.color.primary,
+    },
+
+    /** 画像選択肢のグリッド（県の形・地図ハイライトを4枚並べる：2×2） */
+    imageChoiceGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: design.spacing.sm,
+        marginBottom: design.spacing.lg,
+    },
+
+    /** 画像選択肢の1枚（白カード。左上に番号、右上に選択チェック） */
+    imageChoiceButton: {
+        position: 'relative' as const,
+        padding: design.spacing.sm,
+        backgroundColor: design.color.surface,
+        borderWidth: '1.5px',
+        borderStyle: 'solid',
+        borderColor: design.color.border,
+        borderRadius: design.radius.md,
+        cursor: 'pointer',
+        outline: 'none',
+        WebkitTapHighlightColor: 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    /** 画像選択肢（選択中）：ティール枠＋淡い背景 */
+    imageChoiceButtonSelected: {
+        backgroundColor: design.color.selected,
+        borderColor: design.color.selectedBorder,
+        borderWidth: '2.5px',
+    },
+
+    /** 画像選択肢の内側（地図/形の描画領域） */
+    imageChoiceInner: {
+        width: '100%',
+        pointerEvents: 'none' as const,   // クリックはボタンが受ける（地図のドラッグ無効）
+    },
+
+    /** 画像選択肢の左上の番号【1〜4】（位置で固定） */
+    imageChoiceKey: {
+        position: 'absolute' as const,
+        top: 6,
+        left: 6,
+        minWidth: '1.5rem',
+        height: '1.5rem',
+        padding: '0 0.35rem',
+        borderRadius: design.radius.full,
+        backgroundColor: design.color.primary,
+        color: '#fff',
+        fontWeight: design.font.weightBold,
+        fontSize: design.font.sizeSm,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2,
+    },
+
+    /** 画像選択肢の右上の選択チェック（✓） */
+    imageChoiceCheck: {
+        position: 'absolute' as const,
+        top: 6,
+        right: 6,
+        color: design.color.selectedText,
+        fontWeight: design.font.weightBold,
+        fontSize: design.font.sizeMd,
+        zIndex: 2,
     },
 
     /** ナビゲーション行 */

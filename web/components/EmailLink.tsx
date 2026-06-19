@@ -1,6 +1,6 @@
 // ===========================
 // メールアドレス表示（スパムbot対策・テキスト版）
-// app/components/EmailLink.tsx
+// components/EmailLink.tsx
 //
 // mailto リンクは使わず、テキストとして表示する。
 // ・user と domain を分割で受け取り、クライアントでマウント後にJSで結合する

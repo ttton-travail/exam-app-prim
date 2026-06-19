@@ -1,6 +1,6 @@
 // ===========================
 // ブランドアイコン表示
-// BrandIcon.tsx
+// components/BrandIcon.tsx
 //
 // lib/assets.ts の BRAND_ICONS に登録したSNS等のロゴSVGを表示する。
 // color 未指定ならブランド公式カラーで塗る。

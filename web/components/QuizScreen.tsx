@@ -1,6 +1,6 @@
 // ===========================
 // 問題演習画面コンポーネント
-// app/components/QuizScreen.tsx
+// components/QuizScreen.tsx
 // ===========================
 
 import { styles, labels } from '@/lib/design'
@@ -59,11 +59,12 @@ export default function QuizScreen({
         <p style={{ ...styles.questionText, fontSize: r.bodySize }}><Furigana text={q.question} /></p>
 
         {/** 地図（地図系の出題のみ）。
-             ・単独出題（mapHighlight=true）… 対象を強調して「これは何？」と問う。
+             ・名前→地図（highlightMapNos）… 1枚の地図に候補4つを塗り、4択「○番」で答える。
+             ・地図→名前（mapHighlight=true）… 対象を1つ強調して「これは何？」と問う。
              ・組み合わせ出題（mapHighlight=false）… 参照用に全番号を表示（強調しない）。
-             ・県の形（pref-shape）… その県の形だけを表示。 */}
+             ・県の形（pref-shape）… その県の形だけを表示（白・県庁点つき）。 */}
         {q.mapKind && (
-          <div style={{ margin: '0 auto 16px', maxWidth: 420 }}>
+          <div style={{ margin: '0 auto 16px', maxWidth: q.mapKind === 'pref-shape' ? 360 : 760 }}>
             <JapanMap
               kind={q.mapKind === 'pref' ? 'prefecture' : q.mapKind}
               highlightMapNo={
@@ -73,37 +74,79 @@ export default function QuizScreen({
                     ? q.mapNo
                     : undefined
               }
+              highlightMapNos={q.highlightMapNos}
               mode="active"
-              maxWidth={420}
+              showCapitals={q.showCapitals}
+              maxWidth={q.mapKind === 'pref-shape' ? 360 : 760}
+              zoomable={q.mapKind !== 'pref-shape'}
             />
           </div>
         )}
 
-        {/** 選択肢（表示キーは位置から振る。データ上のIDで選択判定） */}
-        <div style={{ ...styles.choiceList, gap: r.choiceGap }}>
-          {q.choices.map((choice, i) => {
-            const isSelected = answers[q.id] === choice.id
-            return (
-              <button
-                key={choice.id}
-                onClick={() => onAnswer(q.id, choice.id)}
-                style={{
-                  ...styles.choiceButton,
-                  fontSize: r.bodySize,
-                  ...(isSelected ? styles.choiceButtonSelected : {}),
-                }}
-              >
-                <span style={styles.choiceKey}>{displayKey(i)}</span>
-                <span><Furigana text={choice.text} /></span>
-                {isSelected && (
-                  <span style={styles.choiceCheck} aria-hidden="true">
-                    {labels.result.selectedMark}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+        {/** 選択肢。
+             ・通常（choiceRender='text' or 未指定）… 文字ボタンを縦に並べる。
+               （名前→地図 も、1枚の地図＋「○番」テキスト4択なのでこちら）
+             ・県の形（choiceRender='pref-shape'）… 個別県SVGを4枚2×2で並べる。
+               各枚の左上に【1】〜【4】（位置で固定）。正解位置は毎回ランダム（choicesがshuffle済）。
+               形は白のまま（背景ハイライトなし）。 */}
+        {q.choiceRender === 'pref-shape' ? (
+          <div style={styles.imageChoiceGrid}>
+            {q.choices.map((choice, i) => {
+              const isSelected = answers[q.id] === choice.id
+              return (
+                <button
+                  key={choice.id}
+                  onClick={() => onAnswer(q.id, choice.id)}
+                  aria-label={`${i + 1}番`}
+                  style={{
+                    ...styles.imageChoiceButton,
+                    ...(isSelected ? styles.imageChoiceButtonSelected : {}),
+                  }}
+                >
+                  <span style={styles.imageChoiceKey}>{i + 1}</span>
+                  {isSelected && (
+                    <span style={styles.imageChoiceCheck} aria-hidden="true">
+                      {labels.result.selectedMark}
+                    </span>
+                  )}
+                  <div style={styles.imageChoiceInner}>
+                    <JapanMap
+                      kind="pref-shape"
+                      highlightMapNo={choice.mapNo}
+                      mode="active"
+                      maxWidth={260}
+                    />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div style={{ ...styles.choiceList, gap: r.choiceGap }}>
+            {q.choices.map((choice, i) => {
+              const isSelected = answers[q.id] === choice.id
+              return (
+                <button
+                  key={choice.id}
+                  onClick={() => onAnswer(q.id, choice.id)}
+                  style={{
+                    ...styles.choiceButton,
+                    fontSize: r.bodySize,
+                    ...(isSelected ? styles.choiceButtonSelected : {}),
+                  }}
+                >
+                  <span style={styles.choiceKey}>{displayKey(i)}</span>
+                  <span><Furigana text={choice.text} /></span>
+                  {isSelected && (
+                    <span style={styles.choiceCheck} aria-hidden="true">
+                      {labels.result.selectedMark}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         {/** 問題インデックス（番号ジャンプ）。クリックでその問題へ。
              現在問=青／回答済み=淡い青／未回答=白 の3状態で進捗を可視化。 */}

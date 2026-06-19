@@ -14,7 +14,7 @@
 // ===========================
 
 import type {
-    Question, Choice, ChoiceId, QuestionType,
+    Question, Choice, ChoiceId, ChoiceRender, QuestionType,
     Prefecture, Region, Ward,
 } from '@/types/quiz'
 import { shuffle } from '@/lib/shuffle'
@@ -42,6 +42,21 @@ interface BuildArgs {
     mapKind?: 'pref' | 'region' | 'ward' | 'pref-shape'
     mapNo?: number
     mapHighlight?: boolean
+    showCapitals?: boolean
+    /** 1枚の地図に候補4つを同時に塗るときの番号一覧（名前→地図）。 */
+    highlightMapNos?: number[]
+    /** 名前→地図 の正解番号（結果画面で正解1つだけを塗るのに使う）。 */
+    answerMapNo?: number
+    /**
+     * 選択肢を画像で出す出題（名前→県の形 等）のとき指定。
+     *   choiceRender … 'pref-shape' | 'pref-map' | 'region-map' | 'ward-map'
+     *   correctMapNo … 正解の対象番号
+     *   wrongMapNos  … 誤答の対象番号（3件）
+     *   correct/wrongs（テキスト）は結果画面・読み上げ用に併せて渡す（順番を合わせる）。
+     */
+    choiceRender?: ChoiceRender
+    correctMapNo?: number
+    wrongMapNos?: number[]
 }
 
 let __qid = 1
@@ -51,8 +66,17 @@ function nextId(): number {
 
 /** 素材から Question を作る（選択肢は後で shuffle される前提） */
 function build(a: BuildArgs): Question {
-    const texts = [a.correct, ...a.wrongs]
-    const choices: Choice[] = texts.map((text, i) => ({ id: i as ChoiceId, text }))
+    const render = a.choiceRender ?? 'text'
+    let choices: Choice[]
+    if (render !== 'text' && a.correctMapNo != null && a.wrongMapNos) {
+        // 画像選択肢：text（名前）と mapNo（描画対象）をペアで持たせる。
+        const texts = [a.correct, ...a.wrongs]
+        const nos = [a.correctMapNo, ...a.wrongMapNos]
+        choices = texts.map((text, i) => ({ id: i as ChoiceId, text, mapNo: nos[i] }))
+    } else {
+        const texts = [a.correct, ...a.wrongs]
+        choices = texts.map((text, i) => ({ id: i as ChoiceId, text }))
+    }
     return {
         id: nextId(),
         unit: a.unitLabel,
@@ -60,11 +84,15 @@ function build(a: BuildArgs): Question {
         question: a.question,
         choices,
         answer: 0 as ChoiceId,   // 正解は常に index0 の中身ID（= 0）。位置はshuffleで動く
+        choiceRender: render,
         explanation: a.explanation,
         keywords: a.keywords,
         mapKind: a.mapKind,
         mapNo: a.mapNo,
         mapHighlight: a.mapHighlight,
+        showCapitals: a.showCapitals,
+        highlightMapNos: a.highlightMapNos,
+        answerMapNo: a.answerMapNo,
     }
 }
 
@@ -75,6 +103,14 @@ function build(a: BuildArgs): Question {
 function pickWrong(pool: string[], exclude: Set<string>, size: number): string[] {
     const cand = shuffle(pool.filter((x) => !exclude.has(x)))
     return cand.slice(0, size)
+}
+
+/**
+ * 画像選択肢用：母集団 pool（県/地方/区オブジェクト）から、excludeId を除いて size 件選ぶ。
+ * mapNo と name の両方が要る画像選択肢のために、オブジェクトのまま返す。
+ */
+function pickWrongItems<T extends { id: string }>(pool: T[], excludeId: string, size: number): T[] {
+    return shuffle(pool.filter((x) => x.id !== excludeId)).slice(0, size)
 }
 
 /** 特産品を「、」区切り1テキストに（将来 代表1品化するなら slice(0,1)）。 */
@@ -243,20 +279,21 @@ export function generateQuestions(
         }
 
         case 'pref_name_to_map': {
+            // 「○○県はどこ？」→ 1枚の日本地図に候補4県を強調し、4択は「○番」で答える。
             for (const p of takePrefs(count)) {
-                const wrongNos = pickWrong(
-                    PREFECTURES.map((x) => String(x.mapNo)),
-                    new Set([String(p.mapNo)]), 3,
-                )
+                const wrongs = pickWrongItems(PREFECTURES, p.id, 3)
+                const candidates = [p, ...wrongs]
+                const highlightMapNos = candidates.map((x) => x.mapNo)
                 out.push(build({
                     unitId, unitLabel,
-                    question: `「${p.name}」は地図のどの番号でしょう？`,
+                    question: `「${p.name}」はどれでしょう？`,
                     correct: `${p.mapNo}番`,
-                    wrongs: wrongNos.map((n) => `${n}番`),
-                    explanation: `「${p.name}」は地図の${p.mapNo}番です。`,
+                    wrongs: wrongs.map((x) => `${x.mapNo}番`),
+                    explanation: `「${p.name}」は地図の${p.mapNo}番の場所です。`,
                     keywords: [p.name, p.nameKana],
-                    mapKind: 'pref', mapNo: p.mapNo,
-                    mapHighlight: true,
+                    mapKind: 'pref',
+                    highlightMapNos,
+                    answerMapNo: p.mapNo,
                 }))
             }
             break
@@ -280,21 +317,19 @@ export function generateQuestions(
         }
 
         case 'pref_name_to_shape': {
-            // 県名 → 県の形。選択肢は各県の地図番号（形を4枚並べてUI側で表示）。
+            // 「○○県はどれでしょう？」→ 各県の形SVGを4枚並べる。
             for (const p of takePrefs(count)) {
-                const wrongNos = pickWrong(
-                    PREFECTURES.map((x) => String(x.mapNo)),
-                    new Set([String(p.mapNo)]), 3,
-                )
+                const wrongs = pickWrongItems(PREFECTURES, p.id, 3)
                 out.push(build({
                     unitId, unitLabel,
-                    question: `「${p.name}」の形はどれでしょう？`,
-                    correct: `${p.mapNo}番`,
-                    wrongs: wrongNos.map((n) => `${n}番`),
-                    explanation: `「${p.name}」の形は${p.mapNo}番です。`,
+                    question: `「${p.name}」はどれでしょう？`,
+                    correct: p.name,
+                    wrongs: wrongs.map((x) => x.name),
+                    explanation: `これが「${p.name}」の形です。`,
                     keywords: [p.name, p.nameKana],
-                    mapKind: 'pref-shape', mapNo: p.mapNo,
-                    mapHighlight: true,
+                    choiceRender: 'pref-shape',
+                    correctMapNo: p.mapNo,
+                    wrongMapNos: wrongs.map((x) => x.mapNo),
                 }))
             }
             break
@@ -309,6 +344,7 @@ export function generateQuestions(
                     wrongs: pickWrong(allCapitals, new Set([p.capital]), 3),
                     explanation: `地図${p.mapNo}番は「${p.name}」、県庁所在地は「${p.capital}」です。`,
                     keywords: [p.name, p.capital, p.capitalKana],
+                    showCapitals: true,
                     mapKind: 'pref', mapNo: p.mapNo,
                     mapHighlight: true,
                 }))
@@ -325,27 +361,63 @@ export function generateQuestions(
                     wrongs: pickWrong(allCapitals, new Set([p.capital]), 3),
                     explanation: `「${p.name}」の県庁所在地は「${p.capital}」です。`,
                     keywords: [p.name, p.capital, p.capitalKana],
+                    showCapitals: true,
                 }))
             }
             break
         }
 
         case 'capital_name_to_map': {
-            // 県庁所在地名 → その県の地図番号（地図上で県をハイライト）
+            // 「[県庁]のある県はどこ？」→ 1枚の日本地図に候補4県を強調し、4択は「○番」。
             for (const p of takePrefs(count)) {
-                const wrongNos = pickWrong(
-                    PREFECTURES.map((x) => String(x.mapNo)),
-                    new Set([String(p.mapNo)]), 3,
-                )
+                const wrongs = pickWrongItems(PREFECTURES, p.id, 3)
+                const highlightMapNos = [p, ...wrongs].map((x) => x.mapNo)
                 out.push(build({
                     unitId, unitLabel,
-                    question: `県庁所在地「${p.capital}」は地図のどの番号でしょう？`,
+                    question: `「${p.capital}」のある県はどれでしょう？`,
                     correct: `${p.mapNo}番`,
-                    wrongs: wrongNos.map((n) => `${n}番`),
-                    explanation: `県庁所在地「${p.capital}」は「${p.name}」、地図の${p.mapNo}番です。`,
+                    wrongs: wrongs.map((x) => `${x.mapNo}番`),
+                    explanation: `県庁所在地「${p.capital}」は「${p.name}」、地図の${p.mapNo}番の場所です。`,
                     keywords: [p.capital, p.name, p.capitalKana],
-                    mapKind: 'pref', mapNo: p.mapNo,
-                    mapHighlight: true,
+                    mapKind: 'pref',
+                    highlightMapNos,
+                    answerMapNo: p.mapNo,
+                }))
+            }
+            break
+        }
+
+        case 'shape_to_capital': {
+            // 県の形（個別SVG）→ その県の県庁所在地を当てる。
+            for (const p of takePrefs(count)) {
+                out.push(build({
+                    unitId, unitLabel,
+                    question: `この形の都道府県の県庁所在地はどれでしょう？`,
+                    correct: p.capital,
+                    wrongs: pickWrong(allCapitals, new Set([p.capital]), 3),
+                    explanation: `この形は「${p.name}」、県庁所在地は「${p.capital}」です。`,
+                    keywords: [p.name, p.capital, p.capitalKana],
+                    showCapitals: true,
+                    mapKind: 'pref-shape', mapNo: p.mapNo,
+                }))
+            }
+            break
+        }
+
+        case 'capital_to_shape': {
+            // 「[県庁]のある県の形はどれでしょう？」→ 各県の形SVGを4枚並べる。
+            for (const p of takePrefs(count)) {
+                const wrongs = pickWrongItems(PREFECTURES, p.id, 3)
+                out.push(build({
+                    unitId, unitLabel,
+                    question: `「${p.capital}」のある県の形はどれでしょう？`,
+                    correct: p.name,
+                    wrongs: wrongs.map((x) => x.name),
+                    explanation: `県庁所在地「${p.capital}」は「${p.name}」。これがその形です。`,
+                    keywords: [p.capital, p.name, p.capitalKana],
+                    choiceRender: 'pref-shape',
+                    correctMapNo: p.mapNo,
+                    wrongMapNos: wrongs.map((x) => x.mapNo),
                 }))
             }
             break
@@ -362,6 +434,7 @@ export function generateQuestions(
                     wrongs,
                     explanation: `正しい組み合わせは「${p.name} - ${p.capital}」です。`,
                     keywords: [p.name, p.capital],
+                    showCapitals: true,
                 }))
             }
             break
@@ -378,6 +451,7 @@ export function generateQuestions(
                     wrongs,
                     explanation: `地図${p.mapNo}番は「${p.name}」、県庁所在地は「${p.capital}」です。`,
                     keywords: [p.name, p.capital],
+                    showCapitals: true,
                     mapKind: 'pref', mapNo: p.mapNo,
                     mapHighlight: false,
                 }))
@@ -471,6 +545,7 @@ export function generateQuestions(
                     wrongs,
                     explanation: `「${p.name}」 - 県庁所在地「${p.capital}」 - 特産品「${specialtyText(p)}」です。`,
                     keywords: [p.name, p.capital, ...p.specialties],
+                    showCapitals: true,
                 }))
             }
             break
@@ -486,6 +561,7 @@ export function generateQuestions(
                     wrongs,
                     explanation: `地図${p.mapNo}番「${p.name}」 - 県庁所在地「${p.capital}」 - 特産品「${specialtyText(p)}」です。`,
                     keywords: [p.name, p.capital, ...p.specialties],
+                    showCapitals: true,
                     mapKind: 'pref', mapNo: p.mapNo,
                     mapHighlight: false,
                 }))
@@ -510,20 +586,20 @@ export function generateQuestions(
         }
 
         case 'region_name_to_map': {
+            // 「○○地方はどこ？」→ 1枚の地方地図に候補4地方を強調し、4択は「○番」。
             for (const r of takeRegions(count)) {
-                const wrongNos = pickWrong(
-                    REGIONS.map((x) => String(x.mapNo ?? 0)),
-                    new Set([String(r.mapNo ?? 0)]), 3,
-                )
+                const wrongs = pickWrongItems(REGIONS, r.id, 3)
+                const highlightMapNos = [r, ...wrongs].map((x) => x.mapNo ?? 0)
                 out.push(build({
                     unitId, unitLabel,
-                    question: `「${r.name}」は地図のどこでしょう？`,
+                    question: `「${r.name}」はどれでしょう？`,
                     correct: `${r.mapNo}番`,
-                    wrongs: wrongNos.map((n) => `${n}番`),
-                    explanation: `「${r.name}」は地図の${r.mapNo}番です。`,
+                    wrongs: wrongs.map((x) => `${x.mapNo}番`),
+                    explanation: `「${r.name}」は地図の${r.mapNo}番の場所です。`,
                     keywords: [r.name, r.nameKana],
-                    mapKind: 'region', mapNo: r.mapNo,
-                    mapHighlight: true,
+                    mapKind: 'region',
+                    highlightMapNos,
+                    answerMapNo: r.mapNo ?? 0,
                 }))
             }
             break
@@ -566,7 +642,7 @@ export function generateQuestions(
             for (const w of takeWards(count)) {
                 out.push(build({
                     unitId, unitLabel,
-                    question: `東京23区の地図【${w.mapNo}】はどの区でしょう？`,
+                    question: `地図の【${w.mapNo}】はどの区でしょう？`,
                     correct: w.name,
                     wrongs: pickWrong(allWardNames, new Set([w.name]), 3),
                     explanation: `地図${w.mapNo}番は「${w.name}」です。`,
@@ -579,20 +655,20 @@ export function generateQuestions(
         }
 
         case 'ward_name_to_map': {
+            // 「○○区はどこ？」→ 1枚の23区地図に候補4区を強調し、4択は「○番」。
             for (const w of takeWards(count)) {
-                const wrongNos = pickWrong(
-                    WARDS.map((x) => String(x.mapNo)),
-                    new Set([String(w.mapNo)]), 3,
-                )
+                const wrongs = pickWrongItems(WARDS, w.id, 3)
+                const highlightMapNos = [w, ...wrongs].map((x) => x.mapNo)
                 out.push(build({
                     unitId, unitLabel,
-                    question: `「${w.name}」は地図のどの番号でしょう？`,
+                    question: `「${w.name}」はどれでしょう？`,
                     correct: `${w.mapNo}番`,
-                    wrongs: wrongNos.map((n) => `${n}番`),
-                    explanation: `「${w.name}」は地図の${w.mapNo}番です。`,
+                    wrongs: wrongs.map((x) => `${x.mapNo}番`),
+                    explanation: `「${w.name}」は地図の${w.mapNo}番の場所です。`,
                     keywords: [w.name, w.nameKana],
-                    mapKind: 'ward', mapNo: w.mapNo,
-                    mapHighlight: true,
+                    mapKind: 'ward',
+                    highlightMapNos,
+                    answerMapNo: w.mapNo,
                 }))
             }
             break

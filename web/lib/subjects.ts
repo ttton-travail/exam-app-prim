@@ -44,6 +44,8 @@ export const SUBJECTS: Subject[] = [
             { id: 'capital_map_to_name', label: '地図→名前', questionType: 'capital_map_to_name', supportsAll: true },
             { id: 'pref_to_capital', label: '都道府県→県庁所在地', questionType: 'pref_to_capital', supportsAll: true },
             { id: 'capital_name_to_map', label: '名前→地図', questionType: 'capital_name_to_map', supportsAll: true },
+            { id: 'shape_to_capital', label: '県の形→県庁所在地', questionType: 'shape_to_capital', supportsAll: true },
+            { id: 'capital_to_shape', label: '県庁所在地→県の形', questionType: 'capital_to_shape', supportsAll: true },
         ],
     },
 

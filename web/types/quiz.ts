@@ -1,6 +1,6 @@
 // ===========================
 // 型定義
-// quiz.ts
+// types/quiz.ts
 // ===========================
 
 import type { ExamFormat } from '@/lib/prompts'
@@ -16,7 +16,22 @@ export type ChoiceId = number
 export interface Choice {
     id: ChoiceId
     text: string
+    /**
+     * 画像で選択肢を出すとき（県の形・日本地図ハイライト等）の対象番号。
+     * choiceRender が 'text' 以外のとき、UIはこの mapNo を使って画像を描く。
+     */
+    mapNo?: number
 }
+
+/**
+ * 選択肢の描画方法。
+ *   'text'        … 文字（既定）。
+ *   'pref-shape'  … 各県の形SVG（個別 prefectures/{mapNo}.svg）を4枚並べる。
+ *   'pref-map'    … 日本地図上で各県を1つだけハイライトした図を4枚。
+ *   'region-map'  … 日本地図上で各地方を1つだけハイライトした図を4枚。
+ *   'ward-map'    … 東京23区地図で各区を1つだけハイライトした図を4枚。
+ */
+export type ChoiceRender = 'text' | 'pref-shape' | 'pref-map' | 'region-map' | 'ward-map'
 
 /** 1問の問題 */
 export interface Question {
@@ -27,6 +42,11 @@ export interface Question {
     question: string
     choices: Choice[]   // 配列の並び順 = 画面の表示順
     answer: ChoiceId    // 正解の「中身のID」。位置ではない
+    /**
+     * 選択肢を画像で出す出題（名前→県の形 等）の描画方法。省略時は 'text'。
+     * 'text' 以外のとき、QuizScreen は choices[].mapNo を使って4枚の画像を並べる。
+     */
+    choiceRender?: ChoiceRender
     explanation: string
     keywords: string[]  // 復習の手がかり。回答時に「キーワード：〜」で表示
     /**
@@ -36,12 +56,25 @@ export interface Question {
     mapKind?: 'pref' | 'region' | 'ward' | 'pref-shape'
     mapNo?: number
     /**
+     * 1枚の地図上で「複数」を同時に強調したいときの番号一覧（名前→地図 等）。
+     * これが入っているときは候補4つだけを地図に塗り、4択は「○番」テキストで答える。
+     * （mapNo/mapHighlight より優先して JapanMap が解釈する）
+     */
+    highlightMapNos?: number[]
+    /**
+     * 名前→地図 など「候補4つを塗る出題」での正解の番号。
+     * 結果画面では候補ではなく「正解1つだけ」を緑で塗るために使う。
+     */
+    answerMapNo?: number
+    /**
      * 地図上で mapNo を強調表示するか。
      *   true  … 単独出題（例：地図→名前）。対象を強調して「これは何？」と問う。
      *   false … 組み合わせ出題。地図は参照用（全番号表示）で、正解を強調しない
      *           （強調すると答えがばれるため）。
      */
     mapHighlight?: boolean
+    /** 県庁所在地の赤点を地図に表示するか（県庁が絡む出題のみ true）。 */
+    showCapitals?: boolean
 }
 
 /** 問題セット（APIレスポンス＝内部形式） */
@@ -96,6 +129,8 @@ export type QuestionType =
     | 'capital_map_to_name'   // 地図（番号）→ 県庁所在地
     | 'pref_to_capital'       // 県名 → 県庁所在地
     | 'capital_name_to_map'   // 県庁所在地名 → 地図（その県の番号）
+    | 'shape_to_capital'      // 県の形 → 県庁所在地
+    | 'capital_to_shape'      // 県庁所在地 → 県の形
     // --- 特産品 ---
     | 'pref_to_specialty'     // 県名 → 特産品
     | 'specialty_map_to_name' // 地図（番号）→ 特産品
