@@ -3,10 +3,11 @@
 // app/layout.tsx
 // ===========================
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import './globals.css'
-import { APP_NAME, APP_TITLE_FULL, APP_DESCRIPTION, SITE_URL, SEO_KEYWORDS, AD_MODE, ADSENSE_CLIENT } from '@/lib/config'
+import { APP_NAME, APP_SHORT_NAME, APP_TITLE_FULL, APP_DESCRIPTION, SITE_URL, SEO_KEYWORDS, AD_MODE, ADSENSE_CLIENT } from '@/lib/config'
+import { design } from '@/lib/design/tokens'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -16,6 +17,15 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   keywords: SEO_KEYWORDS,
+  // PWA マニフェスト（app/manifest.ts が /manifest.webmanifest を生成）。
+  manifest: '/manifest.webmanifest',
+  // iOS はマニフェストを十分に解釈しないため Apple 用メタも併せて出す。
+  // Apple Touch Icon は app/apple-icon.png（180x180）を置くと自動でリンクされる。
+  appleWebApp: {
+    capable: true,
+    title: APP_SHORT_NAME,
+    statusBarStyle: 'default',
+  },
   authors: [{ name: 'Ttton/TtLab' }],
   creator: 'Ttton/TtLab',
   applicationName: APP_NAME,
@@ -40,6 +50,12 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     creator: '@Ttton_nottY',
   },
+}
+
+// ブラウザのアドレスバー等の色（PWAテーマ色）。Next では viewport 側で指定する。
+// 各アプリの design トークンのプライマリ色を使う（manifest の theme_color と揃える）。
+export const viewport: Viewport = {
+  themeColor: design.color.primary,
 }
 
 export default function RootLayout({

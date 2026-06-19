@@ -44,6 +44,8 @@ export const GEMINI_TEMPERATURE = 1
 export const APP_KEY = process.env.NEXT_PUBLIC_APP_KEY ?? 'prim'
 
 export const APP_NAME = 'かたてスト -小学校版-'
+// PWA（ホーム画面追加）やiOS用の短い名前。アイコン下に出るので簡潔に。
+export const APP_SHORT_NAME = 'かたてスト'
 // ブラウザタブ・検索結果・OGP用のフルタイトル（アプリ名＋副題、中黒区切り）。
 // ※ 画面ロゴ横の副題（labels.app.subtitle）は装飾用で別物。
 export const APP_TITLE_FULL = 'かたてスト -小学校版-｜都道府県・県庁所在地・地方・特産品の4択クイズ'
@@ -181,13 +183,14 @@ export const DAILY_GEN_LIMIT_GLOBAL = 2000
 //   'live'        … 実際の AdSense 広告を配信する（審査通過後）。
 // 審査フロー：placeholder でレイアウト確認 → 申請 → 通過後に 'live' へ。
 // ※ 新アプリ用に AdSense は未設定。審査が済むまで 'off'。
-//   審査フロー：'placeholder' でレイアウト確認 → 申請 → 通過後に 'live'。
-export const AD_MODE: 'off' | 'placeholder' | 'live' = 'off'
+// 審査フロー：placeholder でレイアウト確認 → 申請 → 通過後に 'live' へ。
+export const AD_MODE: 'off' | 'placeholder' | 'live' = 'live'
 
-// AdSense のパブリッシャーID（ca-pub-XXXXXXXXXXXXXXXX）。
-// ★鋳型（旧アプリ）のIDは使い回さない。新アプリ用に取得・設定するまで空のまま。
-export const ADSENSE_CLIENT = ''
-// 広告ユニットのスロットID。新アプリで広告ユニットを作成したら設定する。
+// AdSense のパブリッシャーID（ca-pub-XXXXXXXXXXXXXXXX）。通過後に設定。
+export const ADSENSE_CLIENT = 'ca-pub-5827479117826832'
+// 広告ユニットのスロットID。配置ごとに作成して設定する（通過後）。
+// 広告はフッター内（2カラムブロックの下・著作権表記の上）に1か所。
+// 設定画面・結果画面はどちらも同じ Footer を使うため、共通の1スロットで配信する。
 export const ADSENSE_SLOTS = {
-    footerBottom: '', // フッター内バナー（設定・結果の両画面で共有）
+    footerBottom: '4049295913', // フッター内バナー（設定・結果の両画面で共有）
 } as const
