@@ -62,7 +62,7 @@ export const lpContent = {
         {
             image: LP_IMAGES.col2,
             imageAlt: '片手でサクサク進むイメージ',
-            main: '必要なのはかたてだけ',
+            main: '必要なのは"かたて"だけ',
             sub: '問題作成→答え合わせまで、\nスキマ時間でもサクサク進める',
         },
         {
