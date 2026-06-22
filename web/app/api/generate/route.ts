@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { generateQuiz } from '@/lib/gemini'
-import { buildPrompt, DEFAULT_EXAM_FORMAT } from '@/lib/prompts'
+import { buildPrompt, DEFAULT_EXAM_FORMAT, getCurrentFiscalYear } from '@/lib/prompts'
 import { SUBJECTS } from '@/lib/subjects'
 import {
     saveQuestionsToStock,
@@ -186,7 +186,8 @@ export async function POST(req: NextRequest) {
         //     insert 完了前にプロセスが終わって「保存されない」事故になる
         //     （ローカルの常駐Nodeでは最後まで走るため、ローカルだけ保存される症状になる）。
         //   保存は失敗してもユーザー応答は止めない（中で握りつぶしてログのみ）。
-        await saveQuestionsToStock(settings.subjectId, generatedWithIds)
+        // 基準年度（プロンプトに提示した年度と同値）を一緒に保存する。
+        await saveQuestionsToStock(settings.subjectId, generatedWithIds, getCurrentFiscalYear())
 
         // idを1..Nに振り直して返す
         const renumbered = generatedWithIds

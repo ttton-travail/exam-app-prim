@@ -7,6 +7,9 @@
 
 import { buildCsatPrompt } from './csat'
 
+// 基準年度（プロンプト提示＝ストック保存 base_year を同値にするため、生成ルートからも使えるよう再エクスポート）
+export { getCurrentFiscalYear } from './csat'
+
 /** 対応している問題形式 */
 export type ExamFormat = 'csat'
 // 将来追加例:

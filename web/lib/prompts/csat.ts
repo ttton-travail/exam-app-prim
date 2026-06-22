@@ -10,8 +10,8 @@
 //   ルールを直すときはここだけ直せば両方に反映される。
 // ===========================
 
-/** 現在の年度を返す（4月始まり） */
-function getCurrentFiscalYear(): number {
+/** 現在の年度を返す（4月始まり）。プロンプト提示年度とストック保存 base_year を同値にするため共有する。 */
+export function getCurrentFiscalYear(): number {
     const now = new Date()
     return now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1
 }

@@ -78,10 +78,15 @@ export async function getStockQuestions(
 /**
  * 生成した問題をストックに保存する（source='user'）。
  * service_role が無ければ何もしない（保存はベストエフォート）。
+ *
+ * baseYear は「問題作成時に基準とした最新資料の年度（年度＝4月始まり）」。
+ * questions.base_year に記録し、学習指導要領の改訂などで古くなった問題の
+ * 精査・入替の判断に使う。未指定なら null（基準年度不明）で保存する。
  */
 export async function saveQuestionsToStock(
     subjectId: string,
     questions: Question[],
+    baseYear?: number,
 ): Promise<void> {
     const admin = getServiceClient()
     if (!admin) {
@@ -144,6 +149,8 @@ export async function saveQuestionsToStock(
             explanation: q.explanation,
             keywords: q.keywords ?? [],
             source: 'user',
+            // 基準年度（問題作成時に参照した最新資料の年度）。古くなった問題の精査・入替判断に使う。
+            base_year: baseYear ?? null,
             // AI生成直後は未精査。将来の定期ストック整理（重複除去等）で kept/flagged/removed に更新する。
             review_status: 'unchecked',
         }
