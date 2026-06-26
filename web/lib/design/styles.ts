@@ -489,13 +489,84 @@ export const styles: Record<string, React.CSSProperties> = {
         margin: `${design.spacing.xs} 0`,
     },
 
-    /** 解説テキスト */
+    /** 解説の開閉トグル（初期は閉じ。回答ブロックと解説の間の区切り線も兼ねる） */
+    explanationToggle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: design.spacing.xs,
+        width: '100%',
+        marginTop: design.spacing.sm,
+        paddingTop: design.spacing.sm,
+        borderWidth: 0,
+        ...dividers.h,   // = borderTop: DIVIDER_LINE（回答ブロックとの区切り）
+        background: 'none',
+        color: design.color.primary,
+        fontSize: design.font.sizeSm,
+        fontWeight: design.font.weightBold,
+        textAlign: 'left' as const,
+        cursor: 'pointer',
+        outline: 'none',
+        WebkitTapHighlightColor: 'transparent',
+    },
+
+    /** 折りたたみ内の選択肢一覧（A〜D全件。トグルで開いた時に表示） */
+    resultChoiceList: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: design.spacing.xs,
+        marginTop: design.spacing.sm,
+    },
+
+    /** 選択肢一覧の1行（基本＝平常の選択肢） */
+    resultChoiceItem: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: design.spacing.sm,
+        padding: `${design.spacing.xs} ${design.spacing.sm}`,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: design.color.border,
+        borderRadius: design.radius.md,
+        backgroundColor: design.color.surface,
+        fontSize: design.font.sizeSm,
+        lineHeight: '1.6',
+        color: design.color.textPrimary,
+    },
+
+    /** 選択肢一覧：正解の行（青系で強調） */
+    resultChoiceCorrect: {
+        borderColor: design.color.correct,
+        backgroundColor: design.color.correctLight,
+    },
+
+    /** 選択肢一覧：ユーザーが選んだ誤答の行（朱赤系） */
+    resultChoiceUserWrong: {
+        borderColor: design.color.incorrect,
+        backgroundColor: design.color.incorrectLight,
+    },
+
+    /** 選択肢一覧の記号（A/B/C/D） */
+    resultChoiceKey: {
+        fontWeight: design.font.weightBold,
+        minWidth: '1.2rem',
+        color: design.color.primary,
+        flexShrink: 0,
+    },
+
+    /** 選択肢一覧の右端タグ（正解／あなた） */
+    resultChoiceTag: {
+        marginLeft: 'auto',
+        flexShrink: 0,
+        fontSize: design.font.sizeXs,
+        fontWeight: design.font.weightBold,
+        whiteSpace: 'nowrap' as const,
+    },
+
+    /** 解説テキスト（トグルで開いた時に表示。区切り線はトグル側が持つので無し） */
     explanation: {
         fontSize: design.font.sizeSm,
         color: design.color.textSecondary,
         marginTop: design.spacing.sm,
-        paddingTop: design.spacing.sm,
-        ...dividers.h,   // = borderTop: DIVIDER_LINE（区切り線を一元管理に寄せた）
         lineHeight: '1.7',
     },
 

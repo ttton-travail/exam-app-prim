@@ -3,6 +3,7 @@
 // components/ResultScreen.tsx
 // ===========================
 
+import { useState } from 'react'
 import { design, styles, labels } from '@/lib/design'
 import Furigana from '@/components/Furigana'
 import JapanMap from '@/components/JapanMap'
@@ -26,6 +27,11 @@ export default function ResultScreen({
   const score = questions.filter((q) => answers[q.id] === q.answer).length
   const { r, bp } = useResponsive()
 
+  // 解説は初期は閉じる（全体スクロールを抑える）。問題ごとに開閉する。
+  const [openExpl, setOpenExpl] = useState<Record<number, boolean>>({})
+  const toggleExpl = (id: number) =>
+    setOpenExpl((prev) => ({ ...prev, [id]: !prev[id] }))
+
   return (
     <main style={styles.page}>
       <div style={{ ...styles.card, padding: r.cardPadding, marginTop: r.cardMarginY, marginBottom: r.cardMarginY }}>
@@ -46,6 +52,9 @@ export default function ResultScreen({
             const correctIdx = q.choices.findIndex((c) => c.id === q.answer)
             const userChoice = userIdx >= 0 ? q.choices[userIdx] : null
             const correctChoice = correctIdx >= 0 ? q.choices[correctIdx] : null
+            // 県の形（画像4択）は番号、それ以外は A/B/C/D で表示位置を表す
+            const isPrefShape = q.choiceRender === 'pref-shape'
+            const open = !!openExpl[q.id]
 
             return (
               <div
@@ -64,22 +73,70 @@ export default function ResultScreen({
                 </p>
                 <p style={styles.resultQuestion}><Furigana text={q.question} /></p>
 
-                {/** 県の形（画像4択）の問題は、番号＋県名で表す（位置は1始まり）。
-                     正解の県の形を小さく添える（形は白・県庁点つき）。 */}
-                {q.choiceRender === 'pref-shape' ? (
-                  <>
-                    <p style={{ ...styles.resultAnswer, color: design.color.textSecondary }}>
-                      あなたの回答：
-                      {userChoice
+                {/** 回答・正解（初期表示）。県の形は番号、それ以外は A/B/C/D。 */}
+                <p style={{ ...styles.resultAnswer, color: design.color.textSecondary }}>
+                  あなたの回答：
+                  {userChoice
+                    ? (isPrefShape
                         ? `${userIdx + 1}番「${userChoice.text}」`
-                        : '未回答'}
-                    </p>
-                    {!correct && correctChoice && (
-                      <p style={{ ...styles.resultAnswer, ...styles.resultCorrectAnswer }}>
-                        正解：{correctIdx + 1}番「{correctChoice.text}」
-                      </p>
-                    )}
-                    {correctChoice?.mapNo != null && (
+                        : `${displayKey(userIdx)}「${userChoice.text}」`)
+                    : '未回答'}
+                </p>
+                {!correct && correctChoice && (
+                  <p style={{ ...styles.resultAnswer, ...styles.resultCorrectAnswer }}>
+                    正解：
+                    {isPrefShape
+                      ? `${correctIdx + 1}番「${correctChoice.text}」`
+                      : `${displayKey(correctIdx)}「${correctChoice.text}」`}
+                  </p>
+                )}
+
+                {/** 折りたたみ：選択肢一覧＋地図＋解説＋キーワード（初期は閉じる） */}
+                <button
+                  type="button"
+                  onClick={() => toggleExpl(q.id)}
+                  style={styles.explanationToggle}
+                  aria-expanded={open}
+                >
+                  {open ? labels.result.explanationHide : labels.result.explanationShow}
+                </button>
+
+                {open && (
+                  <>
+                    {/* 4択すべての選択肢一覧（正解＝青・選んだ誤答＝朱赤で色分け） */}
+                    <div style={styles.resultChoiceList}>
+                      {q.choices.map((c, i) => {
+                        const isCorrect = c.id === q.answer
+                        const isUser = c.id === userChoiceId
+                        const keyLabel = isPrefShape ? `${i + 1}番` : displayKey(i)
+                        return (
+                          <div
+                            key={c.id}
+                            style={{
+                              ...styles.resultChoiceItem,
+                              ...(isCorrect ? styles.resultChoiceCorrect : {}),
+                              ...(isUser && !isCorrect ? styles.resultChoiceUserWrong : {}),
+                            }}
+                          >
+                            <span style={styles.resultChoiceKey}>{keyLabel}</span>
+                            <span><Furigana text={c.text} /></span>
+                            {(isCorrect || isUser) && (
+                              <span
+                                style={{
+                                  ...styles.resultChoiceTag,
+                                  color: isCorrect ? design.color.correct : design.color.incorrect,
+                                }}
+                              >
+                                {isCorrect ? '正解' : 'あなた'}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/** 県の形（画像4択）の正解の形を小さく添える（形は白・県庁点つき）。 */}
+                    {isPrefShape && correctChoice?.mapNo != null && (
                       <div style={{ maxWidth: 200, margin: '8px 0' }}>
                         <JapanMap
                           kind="pref-shape"
@@ -88,79 +145,59 @@ export default function ResultScreen({
                         />
                       </div>
                     )}
-                  </>
-                ) : (
-                  <>
-                    <p style={{ ...styles.resultAnswer, color: design.color.textSecondary }}>
-                      あなたの回答：
-                      {userChoice
-                        ? `${displayKey(userIdx)}「${userChoice.text}」`
-                        : '未回答'}
-                    </p>
 
-                    {!correct && correctChoice && (
-                      <p style={{ ...styles.resultAnswer, ...styles.resultCorrectAnswer }}>
-                        正解：{displayKey(correctIdx)}「{correctChoice.text}」
+                    {/** 名前→地図 の問題（県/県庁/地方/23区→地図）は、正解1つだけを問題文と同じ色で塗る。 */}
+                    {q.answerMapNo != null && q.mapKind && q.mapKind !== 'pref-shape' && (
+                      <div style={{ maxWidth: q.mapKind === 'ward' ? 360 : 520, margin: '8px auto' }}>
+                        <JapanMap
+                          kind={q.mapKind === 'pref' ? 'prefecture' : q.mapKind}
+                          highlightMapNo={q.answerMapNo}
+                          mode="correct"
+                          correctColor={design.color.primary}
+                          maxWidth={q.mapKind === 'ward' ? 360 : 520}
+                        />
+                      </div>
+                    )}
+
+                    {/** 地図→名前 の問題は対象を1つだけ地図に表示する。 */}
+                    {q.answerMapNo == null
+                      && q.mapNo != null
+                      && q.mapKind
+                      && q.mapKind !== 'pref-shape'
+                      && q.choiceRender !== 'pref-shape' && (
+                      <div style={{ maxWidth: q.mapKind === 'ward' ? 360 : 520, margin: '8px auto' }}>
+                        <JapanMap
+                          kind={q.mapKind === 'pref' ? 'prefecture' : q.mapKind}
+                          highlightMapNo={q.mapNo}
+                          mode="correct"
+                          correctColor={design.color.primary}
+                          showCapitals={q.showCapitals}
+                          maxWidth={q.mapKind === 'ward' ? 360 : 520}
+                        />
+                      </div>
+                    )}
+
+                    {/** 県の形→名前・県の形→県庁所在地 の正解の県の形を小さく添える。 */}
+                    {q.mapKind === 'pref-shape'
+                      && q.choiceRender !== 'pref-shape'
+                      && q.mapNo != null && (
+                      <div style={{ maxWidth: 200, margin: '8px 0' }}>
+                        <JapanMap
+                          kind="pref-shape"
+                          highlightMapNo={q.mapNo}
+                          maxWidth={200}
+                        />
+                      </div>
+                    )}
+
+                    <p style={styles.explanation}><Furigana text={q.explanation} /></p>
+
+                    {q.keywords && q.keywords.length > 0 && (
+                      <p style={styles.keywords}>
+                        キーワード：{q.keywords.join('・')}
                       </p>
                     )}
                   </>
-                )}
-
-                {/** 名前→地図 の問題（県/県庁/地方/23区→地図）は、結果でも地図を表示する。
-                     出題では候補4つを塗るが、結果では「正解1つだけ」を問題文と同じ色（プライマリ）で塗る。 */}
-                {q.answerMapNo != null && q.mapKind && q.mapKind !== 'pref-shape' && (
-                  <div style={{ maxWidth: q.mapKind === 'ward' ? 360 : 520, margin: '8px auto' }}>
-                    <JapanMap
-                      kind={q.mapKind === 'pref' ? 'prefecture' : q.mapKind}
-                      highlightMapNo={q.answerMapNo}
-                      mode="correct"
-                      correctColor={design.color.primary}
-                      maxWidth={q.mapKind === 'ward' ? 360 : 520}
-                    />
-                  </div>
-                )}
-
-                {/** 地図→名前 の問題（地図/特産品→名前・県庁、組み合わせの地図参照）は、
-                     結果でも対象を1つだけ地図に表示する。出題と同じく対象番号を強調する。
-                     answerMapNo を持つ（名前→地図）系は上で処理済みなので、ここは
-                     mapNo を持ち answerMapNo を持たないものだけを対象にする。 */}
-                {q.answerMapNo == null
-                  && q.mapNo != null
-                  && q.mapKind
-                  && q.mapKind !== 'pref-shape'
-                  && q.choiceRender !== 'pref-shape' && (
-                  <div style={{ maxWidth: q.mapKind === 'ward' ? 360 : 520, margin: '8px auto' }}>
-                    <JapanMap
-                      kind={q.mapKind === 'pref' ? 'prefecture' : q.mapKind}
-                      highlightMapNo={q.mapNo}
-                      mode="correct"
-                      correctColor={design.color.primary}
-                      showCapitals={q.showCapitals}
-                      maxWidth={q.mapKind === 'ward' ? 360 : 520}
-                    />
-                  </div>
-                )}
-
-                {/** 県の形→名前・県の形→県庁所在地（mapKind='pref-shape', choiceRender≠pref-shape）の
-                     結果には、正解の県の形を小さく添える。 */}
-                {q.mapKind === 'pref-shape'
-                  && q.choiceRender !== 'pref-shape'
-                  && q.mapNo != null && (
-                  <div style={{ maxWidth: 200, margin: '8px 0' }}>
-                    <JapanMap
-                      kind="pref-shape"
-                      highlightMapNo={q.mapNo}
-                      maxWidth={200}
-                    />
-                  </div>
-                )}
-
-                <p style={styles.explanation}>💡 <Furigana text={q.explanation} /></p>
-
-                {q.keywords && q.keywords.length > 0 && (
-                  <p style={styles.keywords}>
-                    キーワード：{q.keywords.join('・')}
-                  </p>
                 )}
               </div>
             )
